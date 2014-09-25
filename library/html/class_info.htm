@@ -1,0 +1,51 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>类信息</title>
+<link rel="stylesheet" type="text/css" href="css/main.css" />
+</head>
+
+<body>
+<div>
+	<div class="col"></div>
+	<div class="col main-info">
+    	<h1>Class yii\base\Action</h1>
+        <nav class="doc-nav">
+        	<ul>
+            	<li><a href="#">All Classes</a></li>
+                <li><a href="#">Properties</a></li>
+                <li><a href="#">Methods</a></li>
+            </ul>
+        </nav>
+        <table class="doc-table">
+            <tbody><tr><th>Inheritance</th><td><a href="yii-base-action.html">yii\base\Action</a> »
+<a href="yii-base-component.html">yii\base\Component</a> »
+<a href="yii-base-object.html">yii\base\Object</a></td></tr>
+                        <tr><th>Subclasses</th><td><a href="yii-authclient-authaction.html">yii\authclient\AuthAction</a>, <a href="yii-base-inlineaction.html">yii\base\InlineAction</a>, <a href="yii-captcha-captchaaction.html">yii\captcha\CaptchaAction</a>, <a href="yii-elasticsearch-debugaction.html">yii\elasticsearch\DebugAction</a>, <a href="yii-gii-console-generateaction.html">yii\gii\console\GenerateAction</a>, <a href="yii-rest-action.html">yii\rest\Action</a>, <a href="yii-rest-createaction.html">yii\rest\CreateAction</a>, <a href="yii-rest-deleteaction.html">yii\rest\DeleteAction</a>, <a href="yii-rest-indexaction.html">yii\rest\IndexAction</a>, <a href="yii-rest-optionsaction.html">yii\rest\OptionsAction</a>, <a href="yii-rest-updateaction.html">yii\rest\UpdateAction</a>, <a href="yii-rest-viewaction.html">yii\rest\ViewAction</a>, <a href="yii-web-erroraction.html">yii\web\ErrorAction</a>, <a href="yii-web-viewaction.html">yii\web\ViewAction</a></td></tr>
+                        <tr><th>Available since version</th><td>2.0</td></tr>
+                <tr>
+          <th>Source Code</th>
+          <td><a href="https://github.com/yiisoft/yii2/blob/master/framework/base/Action.php">https://github.com/yiisoft/yii2/blob/master/framework/base/Action.php</a></td>
+        </tr>
+    </tbody>
+    </table>
+    <div id="classDescription">
+    <p><strong>Action is the base class for all controller action classes.</strong></p>
+    <p>Action provides a way to divide a complex controller into
+smaller actions in separate class files.</p>
+<p>Derived classes must implement a method named <code>run()</code>. This method
+will be invoked by the controller when the action is requested.
+The <code>run()</code> method can have parameters which will be filled up
+with user input values automatically according to their names.
+For example, if the <code>run()</code> method is declared as follows:</p>
+<pre><code>public function run($id, $type = 'book') { ... }
+</code></pre>
+<p>And the parameters provided for the action are: <code>['id' =&gt; 1]</code>.
+Then the <code>run()</code> method will be invoked as <code>run(1)</code> automatically.</p>
+
+    </div>
+    </div>
+</div>
+</body>
+</html>
