@@ -3,6 +3,7 @@
 namespace bdocument\comment;
 
 use sframe\base\Object;
+use bdocument\comment\sentence\SentenceScaner;
 abstract class CommentGenerator extends Object
 {
 	/**
@@ -29,7 +30,6 @@ abstract class CommentGenerator extends Object
 	public function generate()
 	{
 		$this->listDirs($this->_src);
-		echo '<pre>';print_r($this->_classMap);
 	}
 	
 	private function listDirs($where)
@@ -55,10 +55,15 @@ abstract class CommentGenerator extends Object
 	
 	private function findFile($filepath)
 	{
+		if(substr($filepath, strrpos($filepath, '.')) == '.php')
+		{
+			SentenceScaner::scan($filepath);
+		}
+		return;
 		$handle = fopen($filepath, "r");
 		$namespace = '';
 		$classname = '';
-		$context = '';
+		$context = 'file_comment';
 		$inBlockComment = false;
 		$comments = array();
 		$unknownComments = array();
@@ -67,8 +72,8 @@ abstract class CommentGenerator extends Object
 		
 		while(($line = fgets($handle)) !== false)
 		{
-			$line = preg_replace("/( )+/", " ", trim($line));
 			$isClass = false;
+			$line = preg_replace("/( )+/", " ", trim($line));
 			$words = explode(' ', $line, 3);
 			
 			if('namespace' == $words[0])
@@ -94,9 +99,8 @@ abstract class CommentGenerator extends Object
 			{
 				$inBlockComment = true;
 				$unknownComments = array();
-				if(empty($context))
+				if($context == 'file_comment' && empty($comments['file_comment']))
 				{
-					$context = 'file_comment';
 					$comments[$context][] = $line;
 				}
 				else
@@ -118,7 +122,6 @@ abstract class CommentGenerator extends Object
 			elseif('*/' == $words[0])
 			{
 				$inBlockComment = false;
-				$comments[$context][] = $line;
 				if($context == 'file_comment')
 				{
 					$comments[$context][] = $line;
@@ -129,23 +132,23 @@ abstract class CommentGenerator extends Object
 					$unknownCommentsLineNo = $lineNo;
 				}
 			}
-			elseif($context == 'in_class' && ('public'==$words[0] || 'protect'==$words[0] || 'private'==$words[0]))
+			elseif($context == 'in_class')
 			{
-				echo '<h1>line:'.$lineNo.':'.$line.'</h1>';
-				if($words[1] == 'function') // is method of class
+				if(('public'==$words[0] && 'static'==$words[1]) || 'public'==$words[0] || 'protect'==$words[0] || 'private'==$words[0])
 				{
-					
-				}
-				elseif($words[1] == 'static')
-				{
-					
-				}
-				elseif($words[1][0] == '$')
-				{
-					$arr = explode('=', $words[1]);
-					$propertyName = trim($arr[0],' ;');
-					$comments[$classname]['properties'][$propertyName]['comments'] = $unknownComments;
-					$comments[$classname]['properties'][$propertyName]['access'] = $words[0];
+					if($words[1] == 'function') // is method of class
+					{
+						$propertyName = trim(substr($words[2], 0, strpos($words[2], '(')));
+						$comments[$classname]['methods'][$propertyName]['comments'] = $unknownComments;
+						$comments[$classname]['methods'][$propertyName]['access'] = $words[0];
+					}
+					elseif($words[1][0] == '$')
+					{
+						$arr = explode('=', $words[1]);
+						$propertyName = trim($arr[0],' ;');
+						$comments[$classname]['properties'][$propertyName]['comments'] = $unknownComments;
+						$comments[$classname]['properties'][$propertyName]['access'] = $words[0];
+					}
 				}
 				$unknownComments = array();
 			}
@@ -167,7 +170,11 @@ abstract class CommentGenerator extends Object
 		}
 		
 		fclose($handle);
-		echo '<pre>comments:';print_r($comments).'<br />';
+		if(!empty($comments))
+		{
+			echo '<pre>comments:';
+			print_r($comments).'<br />';
+		}
 	}
 	
 }

@@ -9,7 +9,7 @@ use sframe\base\Application;
 
 defined('CLASS_PATH') ? CLASS_PATH : define('CLASS_PATH', APPLICATION_PATH.DIRECTORY_SEPARATOR.'classes');
 
-class SFrameBase extends Object
+class SFrame extends Object
 {
 	public static $_app = null;
 	
@@ -52,6 +52,8 @@ class SFrameBase extends Object
 			throw new Exception('Object configuration must be an array containing a "class" element.');
 		}
 		
+		$object = null;
+		
 		if(($n=func_num_args())>1)
 		{
 			$args=func_get_args();
@@ -75,8 +77,14 @@ class SFrameBase extends Object
 				$object=$class->newInstanceArgs($args);
 			}
 		}
+		else
+		{
+			$object = new $type();
+		}
+		
+		return $object;
 	}
 	
 }
 
-spl_autoload_register(array('sframe\\SFrameBase','autoload'));
+spl_autoload_register(array('sframe\\SFrame','autoload'));
