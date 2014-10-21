@@ -16,7 +16,7 @@ $reflectionDocComment = new ReflectionDocComment();
 echo $reflectionDocComment->analyze($reflectionClass->getDocComment()); */
 SFrame::createApplication();
 $commentGenerator = CommentGeneratorFactory::create(CommentGeneratorFactory::PHP, array(
-	'src'=>'G:/kuaipan_web/workspaces/document',
+	'src'=>dirname(__FILE__).'/classes/bdocument',
 	'target'=>'',
 ));
 

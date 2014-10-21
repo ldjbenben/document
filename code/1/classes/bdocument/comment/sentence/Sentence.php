@@ -4,12 +4,17 @@ namespace bdocument\comment\sentence;
 
 abstract class Sentence 
 {
-	const SCANING = 1;
-	const OVER = 2;
+	const FIRST = 1;	
+	const SCANING = 2;
 	const DONE = 3;
-	protected $_line;
-	protected $_step = 0;
+	const FAIL = 4;
+	
+	/**
+	 * @var SentenceScaner
+	 */
 	protected $_owner = null;
+	protected $_text;
+	protected $_status = self::FIRST;
 	
 	public function __construct($owner)
 	{
@@ -20,13 +25,23 @@ abstract class Sentence
 	
 	protected function getFirstWord($line)
 	{
+		$word = '';
+		
 		if(($pos = strpos($line, ' ')) === false)
 		{
-			return $line;
+			$word = $line;
 		}
 		else
 		{
-			return substr($line, 0, $pos);
+			$word = substr($line, 0, $pos);
 		}
+		
+		return $word;
+	}
+	
+	protected function reset()
+	{
+		$this->_text = null;
+		$this->_status = self::FIRST;
 	}
 }

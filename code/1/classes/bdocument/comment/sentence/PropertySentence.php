@@ -2,122 +2,103 @@
 
 namespace bdocument\comment\sentence;
 
-use bdocument\comment\entry\PropertyEntry;
 class PropertySentence extends Sentence
 {
-	/**
-	 * @var bdocument\comment\entry\PropertyEntry
-	 */	
-	protected $_property;
-	
-	public function __construct()
-	{
-		$this->_property = new PropertyEntry();
-	}
+	private $_endKeyword = ';';
+	private $_rules = array(
+		'/(private|protected|public)[ ]*(static)?[ ]*\$([\w]+)[ ]*=?[ ]*(.*);/',
+		'static[ ]*(private|protected|public)[ ]*\$([\w]+)[ ]*=?[ ]*(.*);/',
+	);
+	private $_access = array('private', 'protected', 'public');
+	private $_formatId;
 	
 	public function scan($line)
 	{
-		/*
-		 public $name;
-		 public static $name;
-		 static public $name;
-		 const HELLO;
-		 */
-		$this->format1($line);
-	}
-	
-	public function reset()
-	{
-		$this->_step = 0;
-	}
-	
-	/**
-	 * 语法格式1
-	 * private/protect/public $name;
-	 */
-	private function format1($line)
-	{
-		$firstWord = $this->getFirstWord($line);
+		$this->_text .= trim($line);
+		$this->_text = str_replace("\r\n", ' ', $this->_text);
+		$this->_text = str_replace("\n", ' ', $this->_text);
+		$this->_text = preg_replace('/( )+/', ' ', $this->_text);
 		
-		if($this->_step == 0 && in_array($firstWord, array('private', 'protect', 'public')))
+		if(($this->_status = $this->format1($this->_text)) != self::FAIL)
 		{
-			
-			$this->_property->access = $firstWord;
-			$this->_step ++;
-			$line = ltrim(substr($line, strlen($firstWord)));
-			$firstWord = $this->getFirstWord($line);
+// 			$this->_status = $this->format2($this->_text);
 		}
 		else
 		{
-			return self::OVER;
+			$this->reset();
 		}
 		
-		if($this->_step == 1)
+		if ($this->_status == self::SCANING)
 		{
-			if (empty($line))
+			if(($pos = strpos($line, $this->_endKeyword)) === false)
+			{
+				$this->_status = self::SCANING;
+			}
+			else
+			{
+				$this->doScan();
+				$this->_status = self::DONE;
+			}
+		}
+		
+		if($this->_status != self::SCANING)
+		{
+			$this->reset();
+		}
+		
+		return $this->_status;
+	}
+	
+	private function format1($line)
+	{
+		$word = $this->getFirstWord($line);
+		if(in_array($word, $this->_access))
+		{
+			$lessLine = trim(substr($line, strlen($word)));
+			if (empty($lessLine)) 
 			{
 				return self::SCANING;
 			}
-			
-			if($line[0] == '$')
+			elseif($lessLine[0] == '$')
 			{
-				$semicolonPos = strpos($line, ';');
-				$equalPos = strpos($line, '=');
-				
-				if($equalPos === false && $line[strlen($line)-1] == ';')
+				return self::SCANING;
+			}
+			elseif(strpos($lessLine, 'static ') == 0) 
+			{
+				$lessLine = substr($lessLine, strlen('static '));
+				if(empty($lessLine) || $lessLine[0] == '$')
 				{
-					$this->_property->name = substr($line, 0, strlen($line)-1);
-					return self::OVER;
-				}
-				
-				if($equalPos !== false)
-				{
-					$value = trim(substr($line, $equalPos+1));
-					$len = strlen($value);
-					if('"'==$value[0] || "'"==$value[0])
-					{
-						if($value[$len-2] == $value[0] && $value[$len-2])
-						for($i=1; $i<strlen($value); $i++)
-						{
-							if($value[$i] == $value[0] && $value[$i-1] != '\\')
-							{
-								// private $a = "helooo";
-							}
-						}
-					}
-				}
-				
-				if($semicolonPos > $equalPos)
-				{
-					$this->_property->name = rtrim(substr($line, 0, $equalPos));
-				}
-				elseif ($equalPos !== false)
-				{
-					$arr = explode('=', $line);
-					$this->_property->name = rtrim($arr[0]);
-					$this->_property->defaultValue = rtrim($arr[1]);
-				}
-				
-				if($semicolonPos !== false)
-				{
-					return self::OVER;
+					return self::SCANING;
 				}
 			}
+			$this->_formatId = 1;
 		}
+		
+		return self::FAIL;
 	}
-	
-	private function format2()
+		
+	public function doScan()
 	{
-	
-	}
-	
-	private function format3()
-	{
-	
-	}
-	
-	private function format4()
-	{
-	
+		$this->_text = str_replace("\r\n", ' ', $this->_text);
+		$this->_text = str_replace("\n", ' ', $this->_text);
+		$this->_text = preg_replace('/( )+/', ' ', $this->_text);
+		
+		$matches = array();
+		$index = -1;
+		
+		foreach ($this->_rules as $i=>$pattern)
+		{
+			if(preg_match($pattern, $this->_text, $matches) == 1)
+			{
+				echo '<pre>matches:';print_r($matches);
+				$index = $i;
+				break;
+			}
+		}
+		echo '<h1>'.$this->_text.'</h1>';
+		if($index == 0)
+		{
+			$this->_owner->addPropery($matches[3], $matches[1], $matches[2], $matches[4]);
+		}
 	}
 }

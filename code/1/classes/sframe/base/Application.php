@@ -2,7 +2,6 @@
 
 namespace sframe\base;
 
-use sframe\SFrame;
 class Application extends Object
 {
 	protected $_objects;
@@ -11,7 +10,8 @@ class Application extends Object
 	{
 		if(!isset($this->_objects[$className]))
 		{
-			$this->_objects[$className] = SFrame::createObject($className);
+			$this->_objects[$className] = call_user_func_array(array('sframe\SFrame', 'createObject')
+					, func_get_args());
 		}
 		
 		return $this->_objects[$className];

@@ -2,6 +2,8 @@
 
 namespace bdocument;
 
+use sframe\base\Object;
+
 class ClassInfo extends Object 
 {
 	public $namespace;
